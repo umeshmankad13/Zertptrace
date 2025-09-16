@@ -1,7 +1,8 @@
 import { defineConfig, Plugin } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
-import { createServer } from "./server";
+// Remove the top-level import of createServer
+// import { createServer } from "./server";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -9,8 +10,8 @@ export default defineConfig(({ mode }) => ({
     host: "::",
     port: 8080,
     fs: {
-  allow: ["./", "./client", "./shared"],
-},
+      allow: ["./", "./client", "./shared"],
+    },
   },
   build: {
     outDir: "dist/spa",
@@ -28,7 +29,9 @@ function expressPlugin(): Plugin {
   return {
     name: "express-plugin",
     apply: "serve", // Only apply during development (serve mode)
-    configureServer(server) {
+    async configureServer(server) {
+      // Only import here, so it's not required during build
+      const { createServer } = await import("./server");
       const app = createServer();
 
       // Add Express app as middleware to Vite dev server
@@ -36,6 +39,3 @@ function expressPlugin(): Plugin {
     },
   };
 }
-
-
-
